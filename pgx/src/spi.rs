@@ -15,6 +15,8 @@ use num_traits::FromPrimitive;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::{Index, IndexMut};
+use std::ffi::CStr;
+use std::str;
 
 #[derive(Debug, Primitive)]
 pub enum SpiOk {
@@ -465,6 +467,21 @@ impl SpiTupleTable {
             }
         }
     }
+    pub fn get_nattrs(&self) -> i32 {
+        let natts;
+        match self.tupdesc {
+                Some(tupdesc) => unsafe {
+                    natts = (*tupdesc).natts;
+                    natts
+                },
+                None => panic!("TupDesc is NULL"),
+         }
+    }
+    pub fn fname(&self, ordinal: i32) -> String {
+        unsafe {
+             CStr::from_ptr(pg_sys::SPI_fname(self.tupdesc.unwrap(), ordinal)).to_str().unwrap().to_owned()
+        }
+    } 
 }
 
 impl SpiHeapTupleData {
@@ -606,6 +623,16 @@ impl SpiHeapTupleData {
             }
         }
     }
+    pub fn get_nattrs(&self) -> i32 {
+        unsafe {
+            (*self.tupdesc).natts
+        }
+    }
+    pub fn fname(&self, ordinal: i32) -> String {
+         unsafe {
+             CStr::from_ptr(pg_sys::SPI_fname(self.tupdesc, ordinal)).to_str().unwrap().to_owned()
+         }
+    } 
 }
 
 impl<Datum: IntoDatum + FromDatum> From<Datum> for SpiHeapTupleDataEntry {
