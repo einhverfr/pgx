@@ -477,11 +477,16 @@ impl SpiTupleTable {
                 None => panic!("TupDesc is NULL"),
          }
     }
-    pub fn fname(&self, ordinal: i32) -> String {
+    pub fn get_fname(&self, ordinal: i32) -> String {
         unsafe {
              CStr::from_ptr(pg_sys::SPI_fname(self.tupdesc.unwrap(), ordinal)).to_str().unwrap().to_owned()
         }
     } 
+    pub fn get_typeid(&self, ordinal: i32) -> PgOid {
+        unsafe {
+             PgOid::from(pg_sys::SPI_gettypeid(self.tupdesc.unwrap(), ordinal))
+        }
+    }
 }
 
 impl SpiHeapTupleData {
@@ -628,11 +633,16 @@ impl SpiHeapTupleData {
             (*self.tupdesc).natts
         }
     }
-    pub fn fname(&self, ordinal: i32) -> String {
+    pub fn get_fname(&self, ordinal: i32) -> String {
          unsafe {
              CStr::from_ptr(pg_sys::SPI_fname(self.tupdesc, ordinal)).to_str().unwrap().to_owned()
          }
     } 
+    pub fn get_typeid(&self, ordinal: i32) -> PgOid {
+        unsafe {
+             PgOid::from(pg_sys::SPI_gettypeid(self.tupdesc, ordinal))
+        }
+    }
 }
 
 impl<Datum: IntoDatum + FromDatum> From<Datum> for SpiHeapTupleDataEntry {
