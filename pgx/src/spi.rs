@@ -661,6 +661,12 @@ impl SpiHeapTupleDataEntry {
             None => None,
         }
     }
+    pub fn is_null(&self) -> bool {
+        match self.datum.as_ref() {
+            Some(_)    => false,
+            None       => true,
+        }
+    }
 }
 
 /// Provide ordinal indexing into a `SpiHeapTupleData`.
